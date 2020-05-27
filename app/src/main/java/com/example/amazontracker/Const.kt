@@ -13,3 +13,8 @@ const val COL_DATE = "date"
 const val COL_ITEM_URL = "url"
 const val COL_PRICE = "price"
 
+const val INTENT_ITEM_URL = "itemUrl"
+const val INTENT_ITEM_NAME = "itemName"
+const val INTENT_ITEM_PRICE = "itemPrice"
+
+

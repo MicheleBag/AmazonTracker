@@ -2,6 +2,7 @@ package com.example.amazontracker
 
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
@@ -15,8 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jsoup.Jsoup
-import org.jsoup.select.Elements
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(home_toolbar)
+        supportActionBar?.title = "Amazon Tracker"
         val policy =
             StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -75,7 +77,15 @@ class MainActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, pos1: Int) {
             holder.itemName.text = list[pos1].name
-            holder.itemPrice.text = list[pos1].price.toString()
+            holder.itemPrice.text = list[pos1].price.toString()+"€"
+            val itemUrl = list[pos1].url
+            holder.itemName.setOnClickListener{
+                val intent = Intent(context, ItemActivity::class.java)
+                intent.putExtra(INTENT_ITEM_URL, itemUrl)
+                intent.putExtra(INTENT_ITEM_NAME, list[pos1].name)
+                intent.putExtra(INTENT_ITEM_PRICE, list[pos1].price.toString()+"€")
+                context.startActivity(intent)
+            }
         }
 
         class ViewHolder(v: View): RecyclerView.ViewHolder(v){
