@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-
 class MainActivity : AppCompatActivity() {
 
     lateinit var  dbHandler: DBHandler
@@ -32,9 +31,33 @@ class MainActivity : AppCompatActivity() {
         StrictMode.setThreadPolicy(policy)
 
 
-
         dbHandler = DBHandler(this)
         rv_home.layoutManager = LinearLayoutManager(this)
+
+        //Handling prices update
+        var todayDate = dbHandler.getDate()
+        //Get the last check date
+        val prefs = getSharedPreferences("Checks", Context.MODE_PRIVATE)
+        val lastCheckDate = prefs.getString("lastCheck", "0000-00-00")
+        Log.d("LAST CHECK DATE", lastCheckDate)
+        if(lastCheckDate == todayDate){
+            //update or do nothing
+            Log.d("DailyCheck", "Daily price check already done")
+        }
+        else{
+            //Last price check wasn't done today so insert new row
+            Log.d("DailyCheck", "Daily price check")
+            var items : List<Item>
+            items = dbHandler.getAllItems()
+            items.forEach{
+                Log.d("Check: ItemURL", it.url)
+                dbHandler.checkPrice(it)
+            }
+            //Updating last check date
+            val editor = getSharedPreferences("Checks", Context.MODE_PRIVATE).edit()
+            editor.putString("lastCheck", todayDate)
+            editor.apply()
+        }
 
         float_btn.setOnClickListener{
             val dialog = AlertDialog.Builder(this)

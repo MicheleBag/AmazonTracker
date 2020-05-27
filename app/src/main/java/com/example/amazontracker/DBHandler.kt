@@ -54,7 +54,8 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
         val db = writableDatabase
         val date: String = getDate()
         val doc = Jsoup.connect(item.url).get()
-        val price = doc.getElementById("priceblock_ourprice").text()
+        //val price = doc.getElementById("priceblock_ourprice").text()
+        val price  = (0..300).random()
         val cv = ContentValues()
         cv.put(COL_ITEM_URL, item.url)
         cv.put(COL_DATE, date)
@@ -85,6 +86,44 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
         return result
     }
 
+    fun getAllItems() : MutableList<Item>{
+        val result: MutableList<Item> = ArrayList()
+        val db:SQLiteDatabase = readableDatabase
+
+        val queryResult = db.rawQuery("SELECT * from $TABLE_ITEM", null)
+        if(queryResult.moveToFirst()){
+            do{
+                val item = Item()
+                item.name = queryResult.getString(queryResult.getColumnIndex(COL_NAME))
+                item.url = queryResult.getString(queryResult.getColumnIndex(COL_URL))
+                //Log.d("name", item.name)
+                //Log.d("url", item.url)
+                result.add(item)
+            }while(queryResult.moveToNext())
+        }
+        queryResult.close()
+        return result
+    }
+
+    fun getItemHistory(url: String): MutableList<Item>{
+        val result: MutableList<Item> = ArrayList()
+        val db:SQLiteDatabase = readableDatabase
+
+        val queryResult = db.rawQuery("SELECT * from $TABLE_PRICE WHERE $COL_ITEM_URL='$url'", null)
+        if(queryResult.moveToFirst()){
+            do{
+                val item = Item()
+                item.price = queryResult.getFloat(queryResult.getColumnIndex(COL_PRICE))
+                item.data = queryResult.getString(queryResult.getColumnIndex(COL_DATE))
+                //Log.d("name", item.name)
+                //Log.d("url", item.url)
+                result.add(item)
+            }while(queryResult.moveToNext())
+        }
+        queryResult.close()
+        return result
+    }
+
     fun getDate() : String{
         var date = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -96,7 +135,6 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
             val formatter = SimpleDateFormat("yyyy-MM-dd")
             date = formatter.format(day)
         }
-        Log.d("answer",date)
         return date
     }
 }

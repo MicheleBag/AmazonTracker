@@ -15,11 +15,12 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_item"
-        android:layout_width="326dp"
-        android:layout_height="64dp"
+        android:layout_width="334dp"
+        android:layout_height="121dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="12dp"
+        app:autoSizeTextType="uniform"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/item_toolbar" />
 
@@ -29,8 +30,54 @@
         android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"
+        app:autoSizeTextType="uniform"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_item" />
+
+    <TextView
+        android:id="@+id/price_over_time"
+        android:layout_width="182dp"
+        android:layout_height="23dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:textStyle="bold"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_item_price" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="329dp"
+        android:layout_height="89dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/price_over_time"
+        tools:layout_editor_absoluteY="245dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_history"
+                android:layout_width="320dp"
+                android:layout_height="93dp"
+                app:autoSizeTextType="none" />
+        </LinearLayout>
+    </ScrollView>
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/chart"
+        android:layout_width="329dp"
+        android:layout_height="352dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scrollView2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
