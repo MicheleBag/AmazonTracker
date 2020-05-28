@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -24,8 +26,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Actionbar settings
         setSupportActionBar(home_toolbar)
         supportActionBar?.title = "Amazon Tracker"
+
+        //DO-NOT-REMOVE
+        //Used to access on device network
         val policy =
             StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
@@ -36,10 +43,9 @@ class MainActivity : AppCompatActivity() {
 
         //Handling prices update
         var todayDate = dbHandler.getDate()
-        //Get the last check date
+        //Get the last check date from preferences
         val prefs = getSharedPreferences("Checks", Context.MODE_PRIVATE)
         val lastCheckDate = prefs.getString("lastCheck", "0000-00-00")
-        Log.d("LAST CHECK DATE", lastCheckDate)
         if(lastCheckDate == todayDate){
             //update or do nothing
             Log.d("DailyCheck", "Daily price check already done")
@@ -59,11 +65,13 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
+        //Add item button settings for popup dialog
         float_btn.setOnClickListener{
             val dialog = AlertDialog.Builder(this)
             val view = layoutInflater.inflate(R.layout.dialog_main, null)
             val itemUrl = view.findViewById<EditText>(R.id.txt_url)
             dialog.setView(view)
+            dialog.setTitle("Enter an amazon item link")
             dialog.setPositiveButton("Add"){_: DialogInterface, _:Int ->
                 if(itemUrl.text.isNotEmpty()){
                     val item = Item()
@@ -89,9 +97,9 @@ class MainActivity : AppCompatActivity() {
         rv_home.adapter = HomeAdapter(this, dbHandler.getItem())
     }
 
-    class HomeAdapter(val context: Context,val list:MutableList<Item>): RecyclerView.Adapter<HomeAdapter.ViewHolder>(){
+    class HomeAdapter(val activity: MainActivity, val list:MutableList<Item>): RecyclerView.Adapter<HomeAdapter.ViewHolder>(){
         override fun onCreateViewHolder(parent0: ViewGroup, parent1: Int): ViewHolder {
-            return ViewHolder(LayoutInflater.from(context).inflate(R.layout.rv_child_home, parent0, false))
+            return ViewHolder(LayoutInflater.from(activity).inflate(R.layout.rv_child_home, parent0, false))
         }
 
         override fun getItemCount(): Int {
@@ -102,18 +110,39 @@ class MainActivity : AppCompatActivity() {
             holder.itemName.text = list[pos1].name
             holder.itemPrice.text = list[pos1].price.toString()+"€"
             val itemUrl = list[pos1].url
+
             holder.itemName.setOnClickListener{
-                val intent = Intent(context, ItemActivity::class.java)
+                //Go to item activity passing some params
+                val intent = Intent(activity, ItemActivity::class.java)
                 intent.putExtra(INTENT_ITEM_URL, itemUrl)
                 intent.putExtra(INTENT_ITEM_NAME, list[pos1].name)
                 intent.putExtra(INTENT_ITEM_PRICE, list[pos1].price.toString()+"€")
-                context.startActivity(intent)
+                activity.startActivity(intent)
+            }
+
+            holder.menu.setOnClickListener{
+                //Context insted of activity isn't working because we need to invoke refreshList()
+                val popup = PopupMenu(activity, holder.menu)
+                popup.inflate(R.menu.popup)
+                popup.setOnMenuItemClickListener {
+                    //Used when to allow future menu item adds
+                    when(it.itemId){
+                        R.id.menu_delete -> {
+                            activity.dbHandler.deleteItem(itemUrl)
+                            activity.refreshList()
+                        }
+                    }
+                    true
+                }
+                popup.show()
             }
         }
 
         class ViewHolder(v: View): RecyclerView.ViewHolder(v){
+            //Getting rv_child layot component
             val itemName:TextView = v.findViewById(R.id.tv_item_name)
             val itemPrice:TextView = v.findViewById(R.id.tv_item_price)
+            val menu:ImageView = v.findViewById(R.id.iv_menu)
         }
     }
 

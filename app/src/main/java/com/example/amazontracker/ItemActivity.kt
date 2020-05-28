@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.jjoe64.graphview.DefaultLabelFormatter
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter
-import com.jjoe64.graphview.series.BarGraphSeries
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
 import kotlinx.android.synthetic.main.activity_item.*
@@ -22,11 +20,14 @@ class ItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item)
+
+        //Setting up my actionBar
         setSupportActionBar(item_toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
-        supportActionBar?.title = "Dettagli"
+        supportActionBar?.title = "Details"
 
+        //Setting rendered component
         val itemName: TextView = this.findViewById(R.id.tv_item)
         val itemPrice: TextView = this.findViewById(R.id.tv_item_price)
         val itemHistory: TextView = this.findViewById(R.id.tv_history)
@@ -36,12 +37,12 @@ class ItemActivity : AppCompatActivity() {
         itemHistory.text = getHistory(intent.getStringExtra(INTENT_ITEM_URL))
         itemPoT.text = "Price over time"
 
-        //CHart
-        val sdf : SimpleDateFormat = SimpleDateFormat("dd-MM")
-        val graph = findViewById(R.id.chart) as GraphView
+        //Chart init
+        val graph : GraphView = findViewById(R.id.chart)
         val series: LineGraphSeries<DataPoint> = LineGraphSeries(getDataPoints(intent.getStringExtra(INTENT_ITEM_URL)))
         graph.addSeries(series)
 
+        //Chart settings
         graph.gridLabelRenderer.labelFormatter = DateAsXAxisLabelFormatter(this)
         graph.gridLabelRenderer.numHorizontalLabels = 3
         graph.gridLabelRenderer.setHorizontalLabelsAngle(15)
@@ -50,17 +51,17 @@ class ItemActivity : AppCompatActivity() {
         graph.gridLabelRenderer.verticalAxisTitle = "Price"
         graph.gridLabelRenderer.horizontalAxisTitleColor = Color.RED
         graph.gridLabelRenderer.verticalAxisTitleColor = Color.RED
-
         graph.viewport.setMinY(0.toDouble())
         graph.viewport.isScrollable = true
         graph.viewport.setScrollableY(true)
         graph.viewport.isScalable = true
         graph.viewport.setScalableY(true)
-
-
     }
 
     private fun getDataPoints(url: String): Array<DataPoint> {
+        /*
+         * Return array of datapoint used to fill chart
+         */
         dbHandler = DBHandler(this)
         var items : List<Item>
         var values: MutableList<DataPoint> = ArrayList()
@@ -69,14 +70,14 @@ class ItemActivity : AppCompatActivity() {
             val format = SimpleDateFormat("yyyy-MM-dd")
             val x : Date = format.parse(it.data)
             val y : Double = it.price!!.toDouble()
-            val dp : DataPoint = DataPoint(x, y)
+            val dp = DataPoint(x, y)
             values.add(dp)
         }
-
         return values.toTypedArray()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean{
+        //It handle back to the home
         return if(item?.itemId == android.R.id.home){
             finish()
             true
@@ -84,12 +85,11 @@ class ItemActivity : AppCompatActivity() {
             super.onOptionsItemSelected(item)
     }
 
-    override fun onResume() {
-
-        super.onResume()
-    }
 
     fun getHistory(url: String) : String{
+        /*
+         * Return a string that contains every (date,price) of passed item
+         */
         dbHandler = DBHandler(this)
         var items : List<Item>
         var myString:String = ""

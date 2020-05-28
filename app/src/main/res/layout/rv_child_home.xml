@@ -7,29 +7,37 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_item_name"
-        android:layout_width="284dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:gravity="center_vertical"
+        android:layout_width="231dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="20dp"
+        app:autoSizeTextType="none"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/tv_item_price"
-        android:layout_width="62dp"
-        android:layout_height="51dp"
-        android:layout_marginStart="18dp"
-        android:layout_marginLeft="18dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginRight="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:layout_width="56dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="20dp"
+        app:autoSizeTextType="none"
         app:layout_constraintStart_toEndOf="@+id/tv_item_name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iv_menu"
+        android:layout_width="56dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="20dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_vertical_dot"
+        app:layout_constraintStart_toEndOf="@+id/tv_item_price"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

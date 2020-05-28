@@ -38,10 +38,13 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
     }
 
     fun addItem(item : Item): Boolean {
+        /*
+         * Scrape data from amazon link using jsoup and insert those data in $TABLE_ITEM.
+         * After insert it checks the daily price.
+         */
         val db = writableDatabase
         val doc = Jsoup.connect(item.url).get()
         item.name = doc.getElementById("productTitle").text()
-        Log.d("AOOOO", item.url)
         val cv = ContentValues()
         cv.put(COL_URL, item.url)
         cv.put(COL_NAME, item.name)
@@ -51,23 +54,31 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
     }
 
     fun checkPrice(item: Item){
+        /*
+         * Check daily item price and insert it in $TABLE_PRICE
+         */
         val db = writableDatabase
         val date: String = getDate()
         val doc = Jsoup.connect(item.url).get()
         //val price = doc.getElementById("priceblock_ourprice").text()
+
+        //Random price used to test price chart
         val price  = (0..300).random()
+
         val cv = ContentValues()
         cv.put(COL_ITEM_URL, item.url)
         cv.put(COL_DATE, date)
         cv.put(COL_PRICE, price)
-        val result:Long = db.insert(TABLE_PRICE, null, cv)
+        db.insert(TABLE_PRICE, null, cv)
     }
 
     fun getItem() : MutableList<Item>{
+        /*
+         * Return list of items with current daily price
+         */
         val result: MutableList<Item> = ArrayList()
         val db:SQLiteDatabase = readableDatabase
         val date = getDate()
-        Log.d("today", date)
         val queryResult = db.rawQuery("SELECT * from $TABLE_ITEM INNER JOIN $TABLE_PRICE ON $TABLE_ITEM.$COL_URL=$TABLE_PRICE.$COL_ITEM_URL WHERE $COL_DATE='$date'", null)
 
         if(queryResult.moveToFirst()){
@@ -76,9 +87,6 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
                 item.name = queryResult.getString(queryResult.getColumnIndex(COL_NAME))
                 item.url = queryResult.getString(queryResult.getColumnIndex(COL_URL))
                 item.price = queryResult.getFloat(queryResult.getColumnIndex(COL_PRICE))
-                //Log.d("name", item.name)
-                //Log.d("url", item.url)
-                //Log.d("price", item.price.toString())
                 result.add(item)
             }while(queryResult.moveToNext())
         }
@@ -96,8 +104,6 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
                 val item = Item()
                 item.name = queryResult.getString(queryResult.getColumnIndex(COL_NAME))
                 item.url = queryResult.getString(queryResult.getColumnIndex(COL_URL))
-                //Log.d("name", item.name)
-                //Log.d("url", item.url)
                 result.add(item)
             }while(queryResult.moveToNext())
         }
@@ -106,6 +112,9 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
     }
 
     fun getItemHistory(url: String): MutableList<Item>{
+        /*
+         * Return list of (price,data) of an item
+         */
         val result: MutableList<Item> = ArrayList()
         val db:SQLiteDatabase = readableDatabase
 
@@ -115,8 +124,6 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
                 val item = Item()
                 item.price = queryResult.getFloat(queryResult.getColumnIndex(COL_PRICE))
                 item.data = queryResult.getString(queryResult.getColumnIndex(COL_DATE))
-                //Log.d("name", item.name)
-                //Log.d("url", item.url)
                 result.add(item)
             }while(queryResult.moveToNext())
         }
@@ -124,7 +131,18 @@ class DBHandler(private val context: Context) : SQLiteOpenHelper(context, DB_NAM
         return result
     }
 
+
+    fun deleteItem(url : String){
+        /*
+         *Delete item and all stored prices
+         */
+        val db = writableDatabase
+        db.delete(TABLE_PRICE, "$COL_ITEM_URL=?", arrayOf(url.toString()))
+        db.delete(TABLE_ITEM, "$COL_URL=?", arrayOf(url.toString()))
+    }
+
     fun getDate() : String{
+        //Return today date : String
         var date = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val current = LocalDateTime.now()
